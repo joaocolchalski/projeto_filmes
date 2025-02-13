@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import './style.css'
+import { toast, Slide } from 'react-toastify';
 
 export default function Filme() {
     const { id } = useParams();
+    const navigate = useNavigate();
+
     const [filme, setFilme] = useState({});
     const [loading, setLoading] = useState(true);
 
@@ -21,7 +24,7 @@ export default function Filme() {
                     setLoading(false);
                 })
                 .catch(() => {
-                    console.log("Filme não encontrado!");
+                    navigate("/", { replace: true }); // Redireciona para a página inicial
                 });
         }
 
@@ -30,7 +33,45 @@ export default function Filme() {
         return () => {
             console.log("Componente desmontado");
         }
-    }, []);
+    }, [id, navigate]);
+
+    function salvarFilme() {
+        const minhaLista = localStorage.getItem('@primeflix');
+
+        let filmesSalvos = JSON.parse(minhaLista) || [];
+
+        const hasFilme = filmesSalvos.some((filmeSalvo) => filmeSalvo.id === filme.id); // Verifica se o filme já está salvo na lista de filmes salvos do usuário logado no localStorage do navegador
+
+        if (hasFilme) {
+            toast.warn('Esse filme já está na sua lista!', { // Exibe uma mensagem de aviso ao tentar salvar um filme que já está na lista de filmes salvos do usuário logado no localStorage do navegador
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+                transition: Slide,
+            });
+            return;
+        }
+
+        filmesSalvos.push(filme); // Adiciona o filme na lista de filmes salvos do usuário logado no localStorage do navegador
+        localStorage.setItem('@primeflix', JSON.stringify(filmesSalvos)); // Salva a lista de filmes salvos do usuário logado no localStorage do navegador
+
+        toast.success('Filme salvo com sucesso!', { // Exibe uma mensagem de sucesso ao salvar o filme na lista de filmes salvos do usuário logado no localStorage do navegador
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Slide,
+        });
+    }
 
     if (loading) {
         return (
@@ -51,9 +92,9 @@ export default function Filme() {
             <strong>Avaliação: {filme.vote_average} / 10</strong>
 
             <div className="area-buttons">
-                <button>Salvar</button>
+                <button onClick={salvarFilme}>Salvar</button>
                 <button>
-                    <a href="#">
+                    <a href={`https://www.youtube.com/results?search_query=${filme.title} Trailer`} target="blank" rel="external"> {/*Abre em outra aba*/}
                         Trailer
                     </a>
                 </button>
