@@ -12,7 +12,7 @@ export default function Home() {
             const response = await api.get('movie/now_playing', {
                 params: {
                     api_key: 'ff93ea414d798f8bd23cfbf8a6d64855',
-                    lenguage: 'pt-BR',
+                    language: 'pt-BR',
                     page: 1
                 }
             })
